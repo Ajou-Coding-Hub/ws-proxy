@@ -1,12 +1,12 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: nginx
+  name: ws-proxy
 spec:
   selector:
-    app: nginx
+    app: ws-proxy
   ports:
   - protocol: TCP
     port: 80
     targetPort: 80
-    name: nginx
+    name: http

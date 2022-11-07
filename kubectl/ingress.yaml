@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ws-proxy
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    konghq.com/https-redirect-status-code: "308"
+    konghq.com/protocols: https
+    konghq.com/strip-path: "true"
+spec:
+  ingressClassName: kong
+  rules:
+  - host: '*.ajou.codes'
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: ws-proxy
+          servicePort: 80
