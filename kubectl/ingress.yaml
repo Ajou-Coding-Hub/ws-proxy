@@ -15,5 +15,7 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: ws-proxy
-          servicePort: 80
+          service:
+            name: ws-proxy
+            port:
+              number: 80
