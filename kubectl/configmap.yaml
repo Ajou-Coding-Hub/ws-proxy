@@ -23,16 +23,25 @@ data:
 
       server {
         listen 80;
+        
+        location /health-check {
+          return 200;
+        }
+        
+        location /authorization {
+          internal;
+          proxy_pass http://logic-server.ajou-coding-hub.svc.cluster.local/token/check?workspaceId=$workspace_id;
+        }
+      }
+      
+      server {
+        listen 80;
 
         server_name ~^(?<workspace_id>.*?)\.workspace\.;
         resolver kube-dns.kube-system.svc.cluster.local valid=5s;
 
-        location /health-check {
-          return 200;
-        }
-
         location / {
-          auth_request /authorization;
+          # auth_request /authorization;
     
           proxy_set_header Upgrade $http_upgrade;
           proxy_set_header Connection "Upgrade";
@@ -40,10 +49,22 @@ data:
           proxy_set_header Host $host;
           proxy_http_version 1.1;
         }
-        
-        location /authorization {
-          internal;
-          proxy_pass http://logic-server.ajou-coding-hub.svc.cluster.local/token/check?workspaceId=$workspace_id;
+      }
+      
+      server {
+        listen 80;
+
+        server_name ~^(?<workspace_id>.*?)-(?<forwarded_port>\d)\.workspace\.;
+        resolver kube-dns.kube-system.svc.cluster.local valid=5s;
+
+        location / {
+          # auth_request /authorization;
+    
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "Upgrade";
+          proxy_pass http://code-server.$workspace_id.svc.cluster.local:$forwarded_port;
+          proxy_set_header Host $host;
+          proxy_http_version 1.1;
         }
       }
     }
